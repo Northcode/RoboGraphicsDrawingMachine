@@ -21,7 +21,7 @@ public class RoboGraphicsTest {
     public void setup() {
 	FileHandler fh = mock(FileHandler.class);
 	CommandReader reader = new CommandReader(fh);
-	roboGraphics = new RoboGraphics(reader);
+	roboGraphics = new RoboGraphics(reader,10);
     }
 
     @Test public void testPenUp() {
@@ -67,5 +67,60 @@ public class RoboGraphicsTest {
 	roboGraphics.execute(Optional.of(RoboGraphics::selectColorRed));
 	assertEquals("Wrong color!", 'R', roboGraphics.getColor());
     }
-    
+
+    @Test public void testMove() {
+	assertEquals("Wrong starting position!", new Vector2(0,0), roboGraphics.getPosition());
+	roboGraphics.execute(Optional.of(RoboGraphics::turnRight));
+	roboGraphics.execute(Optional.of((rg) -> rg.move(4)));
+	assertEquals("Wrong next position!", new Vector2(4,0), roboGraphics.getPosition());
+	roboGraphics.execute(Optional.of(RoboGraphics::turnRight));
+	roboGraphics.execute(Optional.of((rg) -> rg.move(4)));
+	assertEquals("Wrong next position!", new Vector2(4,4), roboGraphics.getPosition());
+    }
+
+    @Test public void testCanvasLines() {
+	roboGraphics.execute(Optional.of(RoboGraphics::penDown));
+	roboGraphics.execute(Optional.of(RoboGraphics::turnRight));
+	roboGraphics.execute(Optional.of((rg) -> rg.move(4)));
+
+	roboGraphics.execute(Optional.of(RoboGraphics::selectColorBlue));
+	roboGraphics.execute(Optional.of(RoboGraphics::turnRight));
+	roboGraphics.execute(Optional.of((rg) -> rg.move(4)));
+
+	roboGraphics.execute(Optional.of(RoboGraphics::selectColorRed));
+	roboGraphics.execute(Optional.of(RoboGraphics::turnLeft));
+	roboGraphics.execute(Optional.of((rg) -> rg.move(3)));
+
+	roboGraphics.execute(Optional.of(RoboGraphics::turnLeft));
+	roboGraphics.execute(Optional.of((rg) -> rg.move(2)));
+
+	roboGraphics.execute(Optional.of(RoboGraphics::turnLeft));
+	roboGraphics.execute(Optional.of((rg) -> rg.move(5)));
+
+	Stream<String> lines = roboGraphics.canvasLines();
+	//lines.forEach(System.out::println);
+
+	List<String> validLines = Arrays.asList("RRRRR_____",
+						"____B_____",
+						"__RRBRRR__",
+						"____B__R__",
+						"____BRRR__",
+						"__________",
+						"__________",
+						"__________",
+						"__________",
+						"__________");
+	assertEquals("Invalid canvas result!", validLines, lines.collect(Collectors.toList()));
+	// wahoo!!
+    }
+
+    @Test public void testTerminateProgram() {
+	roboGraphics.execute(Optional.of(RoboGraphics::end));
+
+	roboGraphics.execute(Optional.of(RoboGraphics::turnLeft));
+	roboGraphics.execute(Optional.of(RoboGraphics::turnLeft));
+	roboGraphics.execute(Optional.of(RoboGraphics::turnLeft));
+
+	assertEquals("RoboGraphics kept obeying directions even tho its not supposed to!", RoboGraphics.Direction.up, roboGraphics.getDirection());
+    }
 }
