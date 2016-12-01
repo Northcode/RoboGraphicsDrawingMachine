@@ -11,8 +11,13 @@ import java.util.Optional;
 public class Library {
 
     public static void main(String[] args) {
-
+	FileHandler fh = new MyFileAndStdInHandler();
+	if (!fh.openFile("drawing.txt")) return;
 	
+	CommandReader reader = new CommandReader(fh);
+	RoboGraphics rg = new RoboGraphics(reader,20);
 
+	System.out.println("All commands from file 'drawing.txt' will be read\nEnter more here, end with: ^D");
+	rg.executeFromReader();
     }
 }

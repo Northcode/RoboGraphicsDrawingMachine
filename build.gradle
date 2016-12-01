@@ -34,6 +34,13 @@ dependencies {
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.2.27'
 }
 
+jar {
+    manifest.attributes(
+    'Class-Path': configurations.runtime.files.collect { it.name }.join(' '),
+    'Main-Class': mainClassName
+    )
+}
+
 test {
      testLogging {
      	exceptionFormat = 'full'
