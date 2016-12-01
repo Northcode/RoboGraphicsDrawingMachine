@@ -116,7 +116,7 @@ public class RoboGraphics {
 
 	// move
 	Vector2 newpos = penPosition.add(dirMod);
-	if (newpos.x < 0 || newpos.x > canvas.length || newpos.y < 0 || newpos.y > canvas.length)
+	if (newpos.x < 0 || newpos.x >= canvas.length || newpos.y < 0 || newpos.y >= canvas.length)
 	    return; // if we can't move, do nothing
 	penPosition = newpos;
 
