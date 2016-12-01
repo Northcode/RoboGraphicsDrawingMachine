@@ -1,0 +1,11 @@
+# gradle stuff
+.gradle
+build/
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+# gradle wrapper
+gradle/
+gradlew
+gradlew.bat
