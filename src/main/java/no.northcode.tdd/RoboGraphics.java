@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.Arrays;
+import java.util.List;
 
 public class RoboGraphics {
 
@@ -48,9 +49,18 @@ public class RoboGraphics {
 		canvas[i][k] = BLANK_CELL;
     }
 
+    public void executeFromReader() {
+	reader.commands().forEach((cmd) -> this.execute(cmd));
+    }
+
+    public void execute(List<Optional<Command>> commands) {
+	commands.stream().forEach((cmd) -> this.execute(cmd));
+    }
+
     public void execute(Optional<Command> command) {
-	if (!terminated)
+	if (!terminated) {
 	    command.ifPresent((cmd) -> cmd.apply(this));
+	}
     }
 
     public Direction getDirection() { return penDirection; }
@@ -105,7 +115,10 @@ public class RoboGraphics {
 	}
 
 	// move
-	penPosition = penPosition.add(dirMod);
+	Vector2 newpos = penPosition.add(dirMod);
+	if (newpos.x < 0 || newpos.x > canvas.length || newpos.y < 0 || newpos.y > canvas.length)
+	    return; // if we can't move, do nothing
+	penPosition = newpos;
 
 	draw();
     }
@@ -120,6 +133,10 @@ public class RoboGraphics {
 
     public Stream<String> canvasLines() {
 	return Arrays.stream(canvas).map((lineArr) -> new String(lineArr));
+    }
+
+    public void printCanvas() {
+	canvasLines().forEach(System.out::println);
     }
 
     public void draw() {
