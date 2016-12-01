@@ -28,10 +28,10 @@ public class CommandReader {
 	validCommands.put("2", RoboGraphics::penDown);
 	validCommands.put("3", RoboGraphics::turnRight);
 	validCommands.put("4", RoboGraphics::turnLeft);
-	validCommands.put("6", RoboGraphics::turnLeft);
-	validCommands.put("7", RoboGraphics::turnLeft);
-	validCommands.put("8", RoboGraphics::turnLeft);
-	validCommands.put("9", RoboGraphics::turnLeft);
+	validCommands.put("6", RoboGraphics::selectColorRed);
+	validCommands.put("7", RoboGraphics::selectColorBlue);
+	validCommands.put("8", RoboGraphics::printCanvas);
+	validCommands.put("9", RoboGraphics::end);
     }
     
     public static Optional<Command> parseCommand(String line) {
