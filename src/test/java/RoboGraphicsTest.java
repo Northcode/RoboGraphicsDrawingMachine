@@ -19,9 +19,6 @@ public class RoboGraphicsTest {
 
     RoboGraphics roboGraphics;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Before
     public void setup() {
 	FileHandler fh = mock(FileHandler.class);
@@ -92,23 +89,20 @@ public class RoboGraphicsTest {
     }
 
     @Test public void testCanvasLines() {
-	roboGraphics.execute(Optional.of(RoboGraphics::penDown));
-	roboGraphics.execute(Optional.of(RoboGraphics::turnRight));
-	roboGraphics.execute(Optional.of((rg) -> rg.move(4)));
-
-	roboGraphics.execute(Optional.of(RoboGraphics::selectColorBlue));
-	roboGraphics.execute(Optional.of(RoboGraphics::turnRight));
-	roboGraphics.execute(Optional.of((rg) -> rg.move(4)));
-
-	roboGraphics.execute(Optional.of(RoboGraphics::selectColorRed));
-	roboGraphics.execute(Optional.of(RoboGraphics::turnLeft));
-	roboGraphics.execute(Optional.of((rg) -> rg.move(3)));
-
-	roboGraphics.execute(Optional.of(RoboGraphics::turnLeft));
-	roboGraphics.execute(Optional.of((rg) -> rg.move(2)));
-
-	roboGraphics.execute(Optional.of(RoboGraphics::turnLeft));
-	roboGraphics.execute(Optional.of((rg) -> rg.move(5)));
+	Stream.<Optional<Command>>of (Optional.of(RoboGraphics::penDown),
+		   Optional.of(RoboGraphics::turnRight),
+		   Optional.of((rg) -> rg.move(4)),
+		   Optional.of(RoboGraphics::selectColorBlue),
+		   Optional.of(RoboGraphics::turnRight),
+		   Optional.of((rg) -> rg.move(4)),
+		   Optional.of(RoboGraphics::selectColorRed),
+		   Optional.of(RoboGraphics::turnLeft),
+		   Optional.of((rg) -> rg.move(3)),
+		   Optional.of(RoboGraphics::turnLeft),
+		   Optional.of((rg) -> rg.move(2)),
+		   Optional.of(RoboGraphics::turnLeft),
+		   Optional.of((rg) -> rg.move(5)))
+	    .forEach(roboGraphics::execute);
 
 	Stream<String> lines = roboGraphics.canvasLines();
 	//lines.forEach(System.out::println);
