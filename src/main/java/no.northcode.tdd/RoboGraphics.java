@@ -11,16 +11,6 @@ import java.util.function.Function;
 
 public class RoboGraphics {
 
-    @FunctionalInterface
-    public interface ExecCommandErrorHandler {
-	void apply(RoboGraphics rg,String reason);
-    }
-
-    @FunctionalInterface
-    public interface MoveErrorHandler {
-	void apply(RoboGraphics rg, Vector2 triedPosition);
-    }
-
     public enum Direction {
 	up,right,down,left;
 
@@ -62,12 +52,21 @@ public class RoboGraphics {
 		canvas[i][k] = BLANK_CELL;
     }
 
-    public void executeFromReader() {
-	reader.commands().forEach((cmd) -> this.execute(cmd));
+    public Optional<Exception> executeFromReader() {
+	return execute(reader.commands());
     }
 
-    public void execute(List<Optional<Command>> commands) {
-	commands.stream().forEach((cmd) -> this.execute(cmd));
+    public Optional<Exception> execute(List<Optional<Command>> commands) {
+	return execute(commands.stream());
+    }
+
+    public Optional<Exception> execute(Stream<Optional<Command>> commandStream) {
+	// runs all the commands it can until error, then return that error,
+	// if theres no error, returns Optional.empty()
+	return commandStream
+	    .map((cmd) -> this.execute(cmd))
+	    .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
+	    .findFirst(); 
     }
 
     public Optional<Exception> execute(Optional<Command> command) {
