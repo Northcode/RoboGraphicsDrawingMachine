@@ -40,6 +40,7 @@ gradle test
     and simply maps the *parseCommand(String)* function over each line.
     If the line cannot be parsed to a command *parseCommand*, it returns *Optional.empty()*,
     which is never executed.
+
     If we wanted error checking in *CommandReader* we would change the return to be something like,
     *Either<Command,Exception>*, instead of an optional.
     Java does not contain an *Either<T,K>* class by default (there is one in javaslang),
