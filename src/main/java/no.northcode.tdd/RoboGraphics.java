@@ -5,8 +5,21 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public class RoboGraphics {
+
+    @FunctionalInterface
+    public interface ExecCommandErrorHandler {
+	void apply(RoboGraphics rg,String reason);
+    }
+
+    @FunctionalInterface
+    public interface MoveErrorHandler {
+	void apply(RoboGraphics rg, Vector2 triedPosition);
+    }
 
     public enum Direction {
 	up,right,down,left;
@@ -57,10 +70,10 @@ public class RoboGraphics {
 	commands.stream().forEach((cmd) -> this.execute(cmd));
     }
 
-    public void execute(Optional<Command> command) {
+    public Optional<Exception> execute(Optional<Command> command) {
 	if (!terminated) {
-	    command.ifPresent((cmd) -> cmd.apply(this));
-	}
+	    return command.flatMap(cmd -> cmd.apply(this));
+	} else return Optional.of(new Exception("Program terminated, cannot continue"));
     }
 
     public Direction getDirection() { return penDirection; }
@@ -68,25 +81,28 @@ public class RoboGraphics {
     public boolean getIsPenDown() { return isPenDown; }
     public char getColor() { return currentColor; }
     
-    public void penUp() { isPenDown = false; }
-    public void penDown() {
+    public Optional<Exception> penUp() { isPenDown = false; return Optional.empty(); }
+    public Optional<Exception> penDown() {
 	isPenDown = true;
 	// when we place the pen we should draw
-	draw();
+	draw(); return Optional.empty();
     }
-    public void turnRight() { penDirection = penDirection.next(); }
-    public void turnLeft() { penDirection = penDirection.prev(); }
+    public Optional<Exception> turnRight() { penDirection = penDirection.next();  return Optional.empty();}
+    public Optional<Exception> turnLeft() { penDirection = penDirection.prev();  return Optional.empty();}
 
-    public void selectColorRed() { selectColor('R'); }
-    public void selectColorBlue() { selectColor('B'); }
+    public Optional<Exception> selectColorRed() { selectColor('R');  return Optional.empty();}
+    public Optional<Exception> selectColorBlue() { selectColor('B');  return Optional.empty();}
     public void selectColor(char c) { currentColor = c; }
 
-    public void move(int steps) {
-	IntStream.rangeClosed(1,steps)
-	    .forEach(i -> move());
+    public Optional<Exception> move(int steps) {
+	// try to move everystep, exit on the first error and return the error. (keeps evaluating as long as move() returns "Optional.empty()")
+	return IntStream.rangeClosed(1,steps)
+	    .mapToObj(i -> move())
+	    .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
+	    .findFirst();
     }
 
-    public void move() {
+    public Optional<Exception> move() {
 	/* 
 	   up    =>  0,-1
 	   right =>  1, 0
@@ -116,11 +132,15 @@ public class RoboGraphics {
 
 	// move
 	Vector2 newpos = penPosition.add(dirMod);
-	if (newpos.x < 0 || newpos.x >= canvas.length || newpos.y < 0 || newpos.y >= canvas.length)
-	    return; // if we can't move, do nothing
+	if (newpos.x < 0 || newpos.x >= canvas.length || newpos.y < 0 || newpos.y >= canvas.length) {
+	    return Optional.of(new Exception("Cannot move to position outside grid")); // if we can't move, return exception
+	}
+
 	penPosition = newpos;
 
 	draw();
+
+	return Optional.empty();
     }
 
     public char getCurrentCell() {
@@ -135,18 +155,21 @@ public class RoboGraphics {
 	return Arrays.stream(canvas).map((lineArr) -> new String(lineArr));
     }
 
-    public void printCanvas() {
+    public Optional<Exception> printCanvas() {
 	canvasLines().forEach(System.out::println);
+	return Optional.empty();
     }
 
-    public void draw() {
+    public Optional<Exception> draw() {
 	if (isPenDown && getCurrentCell() == BLANK_CELL) {
 	    setCurrentCell(currentColor);
 	}
+	return Optional.empty();
     }
 
-    public void end() {
+    public Optional<Exception> end() {
 	terminated = true;
+	return Optional.empty();
     }
     
 }
